@@ -316,17 +316,43 @@ int CIRCUIT::PrintAllPaths_Stack(const char* startPI, const char* endPO) {
 void CIRCUIT::GenerateRandPattern(const char* output, int num, bool unknown) {
 
     ofstream f(output);
+    
+    srand(time(0));
 
-    // FILE handler
-    if (f.good()) 
-        cout << "YES" << endl;
-    else if(f.fail())
-        cout << "NO" << endl;
-
-    if (!unknown) {
-
+    if(f.fail()) {
+        cout << "Failed to generate file (Missing output parameter)" << endl;
+        exit(-1);
     }
-    else {
 
+    for (unsigned int i = 0; i < this->No_PI(); i++)
+        f << "PI " << this->PIGate(i)->GetName() << " ";
+    f << endl;
+
+    for (int i = 0; i < num; i++) {
+        int tmp = 0;
+        string patternGernerated;
+        for (unsigned int j = 0; j < this->No_PI(); j++) {
+            if (!unknown) {
+                tmp = (int) (2.0 * rand() / (RAND_MAX + 1.0));
+                patternGernerated += to_string(tmp);
+            }
+            else {
+                tmp = (int) (3.0 * rand() / (RAND_MAX + 1.0));
+                switch (tmp) {
+                    case 0:
+                        patternGernerated += '0';
+                        break;
+                    case 1:
+                        patternGernerated += '1';
+                        break;
+                    case 2:
+                        patternGernerated += 'X';
+                        break;
+                }
+            }
+        }
+        f << patternGernerated << endl;
     }
+
+    cout << "Finish generating random pattern (output file is " << output << ")" << endl;
 }

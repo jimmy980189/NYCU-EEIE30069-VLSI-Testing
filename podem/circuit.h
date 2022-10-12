@@ -172,5 +172,8 @@ class CIRCUIT
     //defined in sim.cc for VLSI Testing - Assignment2
     void MLogicSimVectors();
     void MLogicSim();
+    VALUE MEvaluate(GATEPTR gptr);
+    VALUE IntToValue(uint8_t i);
+    int ValueToInt(VALUE v);
 };
 #endif

@@ -1,0 +1,5 @@
+# tmp
+INPUT(G1)
+INPUT(G2)
+OUTPUT(G3)
+G3 = NAND(G1, G2)

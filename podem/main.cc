@@ -48,7 +48,7 @@ int SetupOption(int argc, char ** argv)
     option.enroll("pattern", GetLongOpt::NoValue,
             "generate random patterns w/o unknown values (X)", 0);
     option.enroll("num", GetLongOpt::MandatoryValue,
-            "set .....", 0);
+            "set number of patterns to be generated", 0);
     option.enroll("unknown", GetLongOpt::NoValue,
             "generate random patterns w/ unknown values (X)", 0);
     option.enroll("mod_logicsim", GetLongOpt::NoValue,
@@ -67,10 +67,6 @@ int main(int argc, char ** argv)
     int optind = SetupOption(argc, argv);
     clock_t time_init, time_end;
     time_init = clock();
-
-    //Assignment1 - count all possible paths connecting the given PI and PO.
-    string startPI;
-    string endPO;
 
     //Setup File
     if (optind < argc) {
