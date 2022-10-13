@@ -1,0 +1,86 @@
+c17.bench Ok
+c7522.bench Ok
+-logicsim
+total CPU time = 0.013926
+-mod_logicsim
+total CPU time = 0.013744
+input/c17_10000.input Ok
+---
+-logicsim
+total CPU time = 0.00143
+-mod_logicsim
+total CPU time = 0.001473
+input/c17_1000.input Ok
+---
+-logicsim
+total CPU time = 0.000206
+-mod_logicsim
+total CPU time = 0.000201
+input/c17_100.input Ok
+---
+-logicsim
+total CPU time = 7.9e-05
+-mod_logicsim
+total CPU time = 7.9e-05
+input/c17.input Ok
+---
+-logicsim
+total CPU time = 0.01426
+-mod_logicsim
+total CPU time = 0.01402
+input/c17_unknown_10000.input Ok
+---
+-logicsim
+total CPU time = 0.001536
+-mod_logicsim
+total CPU time = 0.00148
+input/c17_unknown_1000.input Ok
+---
+-logicsim
+total CPU time = 0.00021
+-mod_logicsim
+total CPU time = 0.000208
+input/c17_unknown_100.input Ok
+---
+-logicsim
+total CPU time = 1.40352
+-mod_logicsim
+total CPU time = 1.38484
+input/c7552_10000.input Ok
+---
+-logicsim
+total CPU time = 0.144483
+-mod_logicsim
+total CPU time = 0.144352
+input/c7552_1000.input Ok
+---
+-logicsim
+total CPU time = 0.019944
+-mod_logicsim
+total CPU time = 0.020165
+input/c7552_100.input Ok
+---
+-logicsim
+total CPU time = 0.011939
+-mod_logicsim
+total CPU time = 0.01187
+input/c7552.input Ok
+---
+-logicsim
+total CPU time = 1.65268
+-mod_logicsim
+total CPU time = 1.50952
+input/c7552_unknown_10000.input Ok
+---
+-logicsim
+total CPU time = 0.156668
+-mod_logicsim
+total CPU time = 0.158001
+input/c7552_unknown_1000.input Ok
+---
+-logicsim
+total CPU time = 0.021729
+-mod_logicsim
+total CPU time = 0.021704
+input/c7552_unknown_100.input Ok
+---
