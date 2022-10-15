@@ -173,7 +173,8 @@ class CIRCUIT
     void MLogicSimVectors();
     void MLogicSim();
     VALUE MEvaluate(GATEPTR gptr);
-    VALUE IntToValue(uint8_t i);
+    //VALUE IntToValue(uint8_t i);
+    VALUE IntToValue(bitset<2> i);
     int ValueToInt(VALUE v);
 };
 #endif

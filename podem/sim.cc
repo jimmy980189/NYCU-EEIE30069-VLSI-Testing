@@ -170,16 +170,13 @@ int CIRCUIT::ValueToInt(VALUE v) {
     }
 }
 
-VALUE CIRCUIT::IntToValue(uint8_t i) {
-    switch (i) {
-        case 0b00:
-            return S0;
-        case 0b11:
-            return S1;
-        case 0b10:
-        case 0b01:
-            return X;
-    }
+VALUE CIRCUIT::IntToValue(bitset<2> i) {
+    if (i == 0b00) 
+        return S0;
+    else if (i == 0b11)
+        return S1;
+    else
+        return X;
 }
 
 VALUE CIRCUIT::MEvaluate(GATEPTR gptr) {
@@ -188,15 +185,13 @@ VALUE CIRCUIT::MEvaluate(GATEPTR gptr) {
     VALUE cv(CV[fun]); //controling value
     VALUE value(gptr->Fanin(0)->GetValue());
     int cv_int = cv;
-    uint8_t value_int = value;
-    uint8_t value_tmp;
+    bitset<2> value_int = value;
+    bitset<2> value_tmp;
     //enum VALUE {S0, S1, X, D, B, ILLIGAL};
     switch (fun) {
         case G_AND:
         case G_NAND:
             for (unsigned i = 1;i<gptr->No_Fanin() && value != cv;++i) {
-                //value = AndTable[value][gptr->Fanin(i)->GetValue()];
-
                 value_tmp = this->ValueToInt(gptr->Fanin(i)->GetValue());
                 value_int = this->ValueToInt(value);
                 value = IntToValue(value_int & value_tmp);
@@ -205,8 +200,6 @@ VALUE CIRCUIT::MEvaluate(GATEPTR gptr) {
         case G_OR:
         case G_NOR:
             for (unsigned i = 1;i<gptr->No_Fanin() && value != cv;++i) {
-                //value = OrTable[value][gptr->Fanin(i)->GetValue()];
-                
                 value_tmp = this->ValueToInt(gptr->Fanin(i)->GetValue());
                 value_int = this->ValueToInt(value);
                 value = IntToValue(value_int | value_tmp);
@@ -215,10 +208,8 @@ VALUE CIRCUIT::MEvaluate(GATEPTR gptr) {
         default: break;
     }
     //NAND, NOR and NOT
-    //if (gptr->Is_Inversion()) { value = NotTable[value]; }
     if (gptr->Is_Inversion()) { 
-        //value = NotTable[value]; 
-        value = IntToValue(~ValueToInt(value) & 0b00000011);
+        value = IntToValue(~ValueToInt(value));
     }
     return value;
 }

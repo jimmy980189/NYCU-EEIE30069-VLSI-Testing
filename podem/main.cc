@@ -53,6 +53,8 @@ int SetupOption(int argc, char ** argv)
             "generate random patterns w/ unknown values (X)", 0);
     option.enroll("mod_logicsim", GetLongOpt::NoValue,
             "run modified logic simulation", 0);
+    option.enroll("simulator", GetLongOpt::NoValue,
+            "", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -157,6 +159,9 @@ int main(int argc, char ** argv)
         else {
             cout << "Missing num parameter for generating random patterns" << endl; 
         }
+    }
+    else if (option.retrieve("simulator")) {
+
     }
     else {
         Circuit.GenerateAllFaultList();
