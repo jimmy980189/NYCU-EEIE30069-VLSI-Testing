@@ -356,3 +356,220 @@ void CIRCUIT::GenerateRandPattern(const char* output, int num, bool unknown) {
 
     cout << "Finish generating random pattern (output file is " << output << ")" << endl;
 }
+
+void CIRCUIT::Simulator(const char* output) {
+
+    int start = string(output).find_last_of("/");
+    int end = string(output).find_last_of(".");
+    string filename = string(output).substr(start + 1, end - start - 1);
+
+    ofstream f(output);
+
+    if(f.fail()) {
+        cout << "Failed to generate file" << endl;
+        exit(-1);
+    }
+
+    // GenOutputFile
+
+    // Initialize
+    f << "#include <iostream>" << endl;
+    f << "#include <ctime>" << endl;
+    f << "#include <bitset>" << endl;
+    f << "#include <string>" << endl;
+    f << "#include <fstream>" << endl;
+    f << endl;
+
+    f << "using namespace std;" << endl;
+    f << "const unsigned PatternNum = 16;" << endl;
+    f << endl;
+
+    f << "void evaluate();" << endl;
+    f << "void printIO(unsigned idx);" << endl;
+    f << endl;
+
+    for (unsigned i = 0; i < this->No_Gate(); i++)
+        f << "bitset<PatternNum> G_" << this->Gate(i)->GetName() << "[2];" << endl;
+    f << "bitset<PatternNum> temp;" << endl;
+    
+    f << "ofstream fout(\"" << filename << ".out\",ios::out);" << endl;
+    f << endl;
+
+    // main
+    f << "int main()" << endl;
+    f << "{" << endl;
+    f << "clock_t time_init, time_end;" << endl;
+    f << "time_init = clock();" << endl;
+
+    //FIX divided input pattern in to 16..
+    //ex: 24 -> 16 8
+    list<GATE*> gQueue;
+    unsigned pattern_num(0);
+    unsigned pattern_idx(0);
+    bool isListCompleted = false;
+    while(!Pattern.eof()) { 
+        for(pattern_idx=0; pattern_idx<PatternNum; pattern_idx++) {
+            if(!Pattern.eof()){ 
+                ++pattern_num;
+                Pattern.ReadNextPattern(pattern_idx);
+            }
+            else break;
+        }
+
+        // extra
+        for (unsigned i = 0; i < this->No_PI(); i++) {
+            f << "G_" << this->PIGate(i)->GetName() << "[0] = ";
+            f << this->PIGate(i)->GetWireValue(0).to_ulong() << " ;" << endl; //GX_0
+            f << "G_" << this->PIGate(i)->GetName() << "[1] = ";
+            f << this->PIGate(i)->GetWireValue(1).to_ulong() << " ;" << endl; //GX_1
+        }
+        f << endl;
+        f << "evaluate();" << endl;
+        f << "printIO(" << pattern_idx << ");" << endl;
+        f << endl;
+
+        ScheduleAllPIs();
+
+        // ParallelLogicSim()
+        GATE* gptr;
+        if (!isListCompleted)
+            for (unsigned i = 0;i <= MaxLevel;i++) {
+                while (!Queue[i].empty()) {
+                    gptr = Queue[i].front();
+                    Queue[i].pop_front();
+                    gptr->ResetFlag(SCHEDULED);
+                    ParallelEvaluate(gptr); 
+                    gQueue.push_back(gptr);
+                    //cout << gptr->GetName() << endl;
+                }
+            }
+        isListCompleted = true;
+    }
+
+    f << "time_end = clock();" << endl;
+    f << "cout << \"Total CPU Time = \" << double(time_end - time_init)/CLOCKS_PER_SEC << endl;" << endl;
+    f << "system(\"ps aux | grep a.out \");" << endl;
+    f << "return 0;" << endl;
+    f << "}" << endl;
+
+    // evaluate
+    f << "void evaluate()" << endl;
+    f << "{" << endl;
+
+    // Gate operation
+    for (auto gptr : gQueue) {
+        switch(gptr->GetFunction()) {
+            case G_AND:
+            case G_NAND:
+                for (unsigned i = 0; i < gptr->No_Fanin(); ++i) {
+                    if (i == 0) {
+                        f << "G_" << gptr->GetName() << "[0] = G_" << gptr->Fanin(i)->GetName() << "[0] ;";
+                        f << endl;
+                        f << "G_" << gptr->GetName() << "[1] = G_" << gptr->Fanin(i)->GetName() << "[1] ;";
+                        f << endl;
+                    }
+                    else  {
+                        f << "G_" << gptr->GetName() << "[0] &= G_" << gptr->Fanin(i)->GetName() << "[0] ;";
+                        f << endl;
+                        f << "G_" << gptr->GetName() << "[1] &= G_" << gptr->Fanin(i)->GetName() << "[1] ;";
+                        f << endl;
+                    }
+                }
+                break;
+            case G_OR:
+            case G_NOR:
+                for (unsigned i = 0; i < gptr->No_Fanin(); ++i) {
+                    if (i == 0) {
+                        f << "G_" << gptr->GetName() << "[0] = G_" << gptr->Fanin(i)->GetName() << "[0] ;";
+                        f << endl;
+                        f << "G_" << gptr->GetName() << "[1] = G_" << gptr->Fanin(i)->GetName() << "[1] ;";
+                        f << endl;
+                    }
+                    else  {
+                        f << "G_" << gptr->GetName() << "[0] |= G_" << gptr->Fanin(i)->GetName() << "[0] ;";
+                        f << endl;
+                        f << "G_" << gptr->GetName() << "[1] |= G_" << gptr->Fanin(i)->GetName() << "[1] ;";
+                        f << endl;
+                    }
+                }
+                break;
+            case G_NOT:
+            case G_PO:
+                f << "G_" << gptr->GetName() << "[0] = G_" << gptr->Fanin(0)->GetName() << "[0] ;";
+                f << endl;
+                f << "G_" << gptr->GetName() << "[1] = G_" << gptr->Fanin(0)->GetName() << "[1] ;";
+                f << endl;
+                break;
+            default: 
+                cout << gptr->GetFunction() << endl;
+                break;
+        } 
+        if (gptr->Is_Inversion()) {
+            f << "temp = G_" << gptr->GetName() << "[0] ;" << endl;
+            f << "G_" << gptr->GetName() << "[0] = ~G_" << gptr->GetName() << "[1] ;" << endl;
+            f << "G_" << gptr->GetName() << "[1] = ~temp" << " ;" << endl;
+        }
+    }
+
+    // OUTPUT
+    /*
+     *for (unsigned i = 0; i < No_PO(); i++) {
+     *    f << "G_" << this->POGate(i)->GetName() << "[0] = G_"
+     *}
+     *cout << this->POGate(i)->GetName() << endl;
+     */
+    
+
+    f << "}" << endl;
+
+    // printIO
+    f << "void printIO(unsigned idx)" << endl;
+    f << "{" << endl;
+    f << "for (unsigned j=0; j<idx; j++)" << endl;
+    f << "{" << endl;
+
+    for (int i = 0; i < 1; i++) {
+        // PIlist
+        for (unsigned i = 0; i < this->No_PI(); i++) {
+            f << "    if (G_" << this->PIlist[i]->GetName() << "[0][j]==0)" << endl;
+            f << "    {" << endl;
+            f << "        if (G_" << this->PIlist[i]->GetName() << "[1][j]==1)" << endl;
+            f << "            fout << \"F\";" << endl;
+            f << "        else" << endl;
+            f << "            fout << \"0\";" << endl;
+            f << "    }" << endl;
+            f << "    else" << endl;
+            f << "    {" << endl;
+            f << "        if(G_" << this->PIlist[i]->GetName() << "[1][j] == 1)" << endl;
+            f << "            fout << \"1\";" << endl;
+            f << "        else" << endl;
+            f << "            fout << \"2\";" << endl;
+            f << "    }" << endl;
+        }
+
+        f << "fout<<\" \";" << endl;
+
+        // POlist
+        for (unsigned i = 0; i < this->No_PO(); i++) {
+            f << "    if(G_" << this->POlist[i]->GetName() << "[0][j]==0)" << endl;
+            f << "    {" << endl;
+            f << "        if(G_" << this->POlist[i]->GetName() << "[1][j]==1)" << endl;
+            f << "            fout<<\"F\";" << endl;
+            f << "        else" << endl;
+            f << "            fout<<\"0\";" << endl;
+            f << "    }" << endl;
+            f << "    else" << endl;
+            f << "    {" << endl;
+            f << "        if(G_" << this->POlist[i]->GetName() << "[1][j]==1)" << endl;
+            f << "            fout<<\"1\";" << endl;
+            f << "        else" << endl;
+            f << "            fout<<\"2\";" << endl;
+            f << "    }" << endl;
+        }
+    }
+    f << "fout << endl;" << endl;
+    f << "}" << endl;
+    f << "}" << endl;
+
+    f.close();
+}

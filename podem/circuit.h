@@ -132,7 +132,7 @@ class CIRCUIT
 
 	//defined in psim.cc for parallel logic simulation
 	void ParallelLogicSimVectors();
-	void ParallelLogicSim();
+	int ParallelLogicSim(); //modified to return number of gate evaluations
 	void ParallelEvaluate(GATEPTR gptr);
 	void PrintParallelIOs(unsigned idx);
 	void ScheduleAllPIs();
@@ -173,8 +173,12 @@ class CIRCUIT
     void MLogicSimVectors();
     void MLogicSim();
     VALUE MEvaluate(GATEPTR gptr);
-    //VALUE IntToValue(uint8_t i);
     VALUE IntToValue(bitset<2> i);
     int ValueToInt(VALUE v);
+
+    //defined in circuit.cc for VLSI Testing - Assignment3
+    void Simulator(const char* output);
+    //defined in psim.cc for VLSI Testing - Assignment3
+    void Parallel(ofstream &f);
 };
 #endif

@@ -11,18 +11,20 @@ void CIRCUIT::ParallelLogicSimVectors()
     cout << "Run Parallel Logic simulation" << endl;
     unsigned pattern_num(0);
     unsigned pattern_idx(0);
-    while(!Pattern.eof()){ 
-	for(pattern_idx=0; pattern_idx<PatternNum; pattern_idx++){
-	    if(!Pattern.eof()){ 
-	        ++pattern_num;
-	        Pattern.ReadNextPattern(pattern_idx);
-	    }
-	    else break;
-	}
-	ScheduleAllPIs();
-	ParallelLogicSim();
-	PrintParallelIOs(pattern_idx);
+    int numGateEval = 0;
+    while(!Pattern.eof()) { 
+        for(pattern_idx=0; pattern_idx<PatternNum; pattern_idx++) {
+            if(!Pattern.eof()){ 
+                ++pattern_num;
+                Pattern.ReadNextPattern(pattern_idx);
+            }
+            else break;
+        }
+        ScheduleAllPIs();
+        numGateEval += ParallelLogicSim();
+        PrintParallelIOs(pattern_idx);
     }
+    cout << "Number of gate evaluations: " << numGateEval << endl;
 }
 
 //Assign next input pattern to PI's idx'th bits
@@ -51,18 +53,21 @@ void PATTERN::ReadNextPattern(unsigned idx)
 }
 
 //Simulate PatternNum vectors
-void CIRCUIT::ParallelLogicSim()
+int CIRCUIT::ParallelLogicSim()
 {
     GATE* gptr;
+    int numGateEval = 0;
     for (unsigned i = 0;i <= MaxLevel;i++) {
         while (!Queue[i].empty()) {
             gptr = Queue[i].front();
             Queue[i].pop_front();
             gptr->ResetFlag(SCHEDULED);
+            cout << gptr->GetName() << endl;
             ParallelEvaluate(gptr);
+            ++numGateEval;
         }
     }
-    return;
+    return numGateEval;
 }
 
 //Evaluate parallel value of gptr
