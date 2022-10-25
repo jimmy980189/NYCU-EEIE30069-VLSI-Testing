@@ -62,7 +62,7 @@ int CIRCUIT::ParallelLogicSim()
             gptr = Queue[i].front();
             Queue[i].pop_front();
             gptr->ResetFlag(SCHEDULED);
-            cout << gptr->GetName() << endl;
+            //cout << gptr->GetName() << endl;
             ParallelEvaluate(gptr);
             ++numGateEval;
         }

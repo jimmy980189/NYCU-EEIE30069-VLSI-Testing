@@ -439,6 +439,7 @@ void CIRCUIT::Simulator(const char* output) {
                     Queue[i].pop_front();
                     gptr->ResetFlag(SCHEDULED);
                     ParallelEvaluate(gptr); 
+
                     gQueue.push_back(gptr);
                 }
             }
@@ -494,13 +495,14 @@ void CIRCUIT::Simulator(const char* output) {
                 break;
             case G_NOT:
             case G_PO:
+            case G_BUF:
                 f << "G_" << gptr->GetName() << "[0] = G_" << gptr->Fanin(0)->GetName() << "[0] ;";
                 f << endl;
                 f << "G_" << gptr->GetName() << "[1] = G_" << gptr->Fanin(0)->GetName() << "[1] ;";
                 f << endl;
                 break;
             default: 
-                //cout << gptr->GetFunction() << endl;
+                cout << gptr->GetFunction() << endl;
                 break;
         } 
         if (gptr->Is_Inversion()) {

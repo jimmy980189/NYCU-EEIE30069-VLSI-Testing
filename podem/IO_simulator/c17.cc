@@ -94,8 +94,6 @@ G_net18[1] &= G_G2[1] ;
 temp = G_net18[0] ;
 G_net18[0] = ~G_net18[1] ;
 G_net18[1] = ~temp ;
-G_net25[0] = G_net14[0] ;
-G_net25[1] = G_net14[1] ;
 temp = G_net25[0] ;
 G_net25[0] = ~G_net25[1] ;
 G_net25[1] = ~temp ;
@@ -113,10 +111,6 @@ G_G17[1] |= G_net25[1] ;
 temp = G_G17[0] ;
 G_G17[0] = ~G_G17[1] ;
 G_G17[1] = ~temp ;
-G_PO_G16[0] = G_G16[0] ;
-G_PO_G16[1] = G_G16[1] ;
-G_PO_G17[0] = G_G17[0] ;
-G_PO_G17[1] = G_G17[1] ;
 }
 void printIO(unsigned idx)
 {
