@@ -438,8 +438,9 @@ void CIRCUIT::Simulator(const char* output) {
                     gptr = Queue[i].front();
                     Queue[i].pop_front();
                     gptr->ResetFlag(SCHEDULED);
-                    ParallelEvaluate(gptr); 
+                    //ParallelEvaluate(gptr); 
 
+                    ScheduleFanout(gptr);
                     gQueue.push_back(gptr);
                 }
             }
