@@ -4,6 +4,7 @@
 #include "circuit.h"
 #include "GetLongOpt.h"
 #include <algorithm>   
+#include <map>
 using namespace std;
 
 extern GetLongOpt option;
@@ -41,6 +42,84 @@ void CIRCUIT::GenerateAllFaultList()
     } //end all gates
     //copy Flist to undetected Flist (for fault simulation)
     UFlist = Flist;
+    return;
+}
+
+//generate all stuck-at fault list w/ check point theorem
+void CIRCUIT::GenerateCheckPointFaultList()
+{
+    cout << "Generate stuck-at fault list w/ checkpoint theorem" << endl;
+    register unsigned i, j;
+    GATEFUNC fun;
+    GATEPTR gptr, fanout;
+    FAULT *fptr;
+    for (i = 0; i < No_PI(); ++i) {
+        gptr = Netlist[i]; fun = gptr->GetFunction();
+        //add PI stuck-at 0 fault to Flist
+        fptr = new FAULT(gptr, gptr, S0);
+        Flist.push_front(fptr);
+        //add PI stuck-at 1 fault to Flist
+        fptr = new FAULT(gptr, gptr, S1);
+        Flist.push_front(fptr);
+    }
+
+    for (i = 0;i<No_Gate();++i) {
+        gptr = Netlist[i]; fun = gptr->GetFunction();
+        if (fun == G_PO) { continue; } //skip PO
+        if (gptr->No_Fanout() == 1) { continue; } //no branch faults
+
+        //add branch fault
+        for (j = 0;j< gptr->No_Fanout();++j) {
+            fanout = gptr->Fanout(j);
+            fptr = new FAULT(gptr, fanout, S0);
+            fptr->SetBranch(true);
+            Flist.push_front(fptr);
+            fptr = new FAULT(gptr, fanout, S1);
+            fptr->SetBranch(true);
+            Flist.push_front(fptr);
+        } //end all fanouts
+    } //end all gates
+    //copy Flist to undetected Flist (for fault simulation)
+    UFlist = Flist;
+    return;
+}
+
+void CIRCUIT::GenerateAllBFaultList(const char* output) {
+    ofstream f(output);
+    
+    if(f.fail()) {
+        cout << "Failed to open file or Missing output parameter" << endl;
+        exit(-1);
+    }
+
+    cout << "Generate bridging fault list" << endl;
+    register unsigned i;
+
+    GATE* gptr;
+    BFAULT *fptr;
+
+    for (auto gptr : Netlist)
+        Queue[gptr->GetLevel()].push_back(gptr);
+    
+    for (i = 0; i < MaxLevel; ++i) {
+        while (Queue[i].size() > 1) {
+            gptr = Queue[i].front();
+            Queue[i].pop_front();
+            
+            if (gptr->GetFunction() == G_PO)
+                continue;
+
+            fptr = new BFAULT(gptr, Queue[i].front(), AND, S0);
+            BFlist.push_front(fptr);
+            f << gptr->GetName() << "," << Queue[i].front()->GetName() << ",AND" << endl;
+            fptr = new BFAULT(gptr, Queue[i].front(), OR, S1);
+            BFlist.push_front(fptr);
+            f << gptr->GetName() << "," << Queue[i].front()->GetName() << ",OR" << endl;
+        }
+    }
+
+    UBFlist = BFlist;
+    f.close();
     return;
 }
 

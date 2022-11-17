@@ -55,6 +55,10 @@ int SetupOption(int argc, char ** argv)
             "run modified logic simulation", 0);
     option.enroll("simulator", GetLongOpt::MandatoryValue,
             "run compiled code simulator", 0);
+    option.enroll("check_point", GetLongOpt::NoValue,
+            "Generate stuck-at fault list w/ checkpoint theorem", 0);
+    option.enroll("bridging", GetLongOpt::NoValue,
+            "Generate special fault list for bridging faults", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -163,6 +167,13 @@ int main(int argc, char ** argv)
     else if (option.retrieve("simulator")) {
         Circuit.InitPattern(option.retrieve("input"));
         Circuit.Simulator(option.retrieve("simulator"));
+    }
+    else if (option.retrieve("check_point")) {
+        Circuit.GenerateCheckPointFaultList();
+        cout << "Number of faults w/ check point theorem: " << Circuit.No_Flist() << endl;
+    }
+    else if (option.retrieve("bridging")) {
+        Circuit.GenerateAllBFaultList(option.retrieve("output"));
     }
     else {
         Circuit.GenerateAllFaultList();

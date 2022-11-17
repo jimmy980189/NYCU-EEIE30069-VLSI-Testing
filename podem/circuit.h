@@ -2,6 +2,7 @@
 #define CIRCUIT_H
 #include "fault.h"
 #include "tfault.h"
+#include "bfault.h"
 #include "ReadPattern.h"
 #include <stdlib.h>
 #include <stack>
@@ -23,6 +24,8 @@ class CIRCUIT
         list<FAULT*> UFlist; //undetected fault list
         list<TFAULT*> TFlist; //collapsing fault list
         list<TFAULT*> UTFlist; //undetected fault list
+        list<BFAULT*> BFlist; //bridging fault list
+        list<BFAULT*> UBFlist; //undetected bridging fault list
         unsigned MaxLevel;
         unsigned BackTrackLimit; //backtrack limit for Podem
         typedef list<GATE*> ListofGate;
@@ -53,6 +56,10 @@ class CIRCUIT
             for (unsigned i = 0;i<Netlist.size();++i) { delete Netlist[i]; }
             list<FAULT*>::iterator fite;
             for (fite = Flist.begin();fite!=Flist.end();++fite) { delete *fite; }
+            /*
+             *list<BFAULT*>::iterator fite2;
+             *for (fite2 = BFlist.begin();fite2!=BFlist.end();++fite2) { delete *fite2; }
+             */
         }
 
         void AddGate(GATE* gptr) { Netlist.push_back(gptr); }
@@ -106,6 +113,8 @@ class CIRCUIT
         void GenerateAllFaultList();
         void GenerateCheckPointFaultList();
         void GenerateFaultList();
+        int No_Flist() { return Flist.size(); }
+        int No_UFlist() { return UFlist.size(); }
         void Atpg();
         void SortFaninByLevel();
         bool CheckTest();
@@ -180,5 +189,8 @@ class CIRCUIT
     void Simulator(const char* output);
     //defined in psim.cc for VLSI Testing - Assignment3
     void Parallel(ofstream &f);
+
+    //defined in atpg.cc for VLIS Testing - Assignment4
+    void GenerateAllBFaultList(const char* output);
 };
 #endif

@@ -80,7 +80,6 @@ void CIRCUIT::Levelize()
 
 void CIRCUIT::Check_Levelization()
 {
-
     GATE* gptr;
     GATE* in;
     unsigned i, j;
@@ -566,3 +565,4 @@ void CIRCUIT::Simulator(const char* output) {
 
     f.close();
 }
+
