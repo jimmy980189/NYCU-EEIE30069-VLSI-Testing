@@ -59,6 +59,8 @@ int SetupOption(int argc, char ** argv)
             "Generate stuck-at fault list w/ checkpoint theorem", 0);
     option.enroll("bridging", GetLongOpt::NoValue,
             "Generate special fault list for bridging faults", 0);
+    option.enroll("bridging_fsim", GetLongOpt::NoValue,
+            "run parallel bridging fault simulation", 0);
     int optind = option.parse(argc, argv);
     if ( optind < 1 ) { exit(0); }
     if ( option.retrieve("help") ) {
@@ -176,15 +178,24 @@ int main(int argc, char ** argv)
         Circuit.GenerateAllBFaultList(option.retrieve("output"));
     }
     else {
-        Circuit.GenerateAllFaultList();
-        Circuit.SortFaninByLevel();
-        Circuit.MarkOutputGate();
         if (option.retrieve("fsim")) {
             //stuck-at fault simulator
+            //Circuit.GenerateAllFaultList();
+            Circuit.GenerateCheckPointFaultList();
+            Circuit.SortFaninByLevel();
+            Circuit.MarkOutputGate();
+
             Circuit.InitPattern(option.retrieve("input"));
             Circuit.FaultSimVectors();
         }
+        else if (option.retrieve("bridging_fsim")) {
+            Circuit.GenerateAllBFaultList("tmp.txt");
+            Circuit.SortFaninByLevel();
+            Circuit.MarkOutputGate();
 
+            Circuit.InitPattern(option.retrieve("input"));
+            Circuit.BFaultSimVectors();
+        }
         else {
             if (option.retrieve("bt")) {
                 Circuit.SetBackTrackLimit(atoi(option.retrieve("bt")));

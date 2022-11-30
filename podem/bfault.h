@@ -9,8 +9,13 @@ class BFAULT
         VALUE Value;
         GATE* Gate1;
         GATE* Gate2; 
+
+        GATE* Input;
+        GATE* Output;
+
+        BFAULT_TYPE Type;
+
         bool Branch; //fault is on branch
-        BFAULT_TYPE Type; //
         unsigned EqvFaultNum; //equivalent fault number (includes itself)
         FAULT_STATUS Status;
     public:
@@ -21,6 +26,10 @@ class BFAULT
         BFAULT_TYPE GetType() { return Type; }
         GATE* GetGate1() { return Gate1; }
         GATE* GetGate2() { return Gate2; }
+        GATE* GetInputGate() { return Input; }
+        GATE* GetOutputGate() { return Output; }
+        void SetInput(GATE* gptr) { Input = gptr; } 
+        void SetOutput(GATE* gptr) { Output = gptr; }
         void SetBranch(bool b) { Branch = b; }
         bool Is_Branch() { return Branch; }
         void SetEqvFaultNum(unsigned n) { EqvFaultNum = n; }

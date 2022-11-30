@@ -190,7 +190,11 @@ class CIRCUIT
     //defined in psim.cc for VLSI Testing - Assignment3
     void Parallel(ofstream &f);
 
-    //defined in atpg.cc for VLIS Testing - Assignment4
+    //defined in bfsim.cc for VLIS Testing - Assignment4
     void GenerateAllBFaultList(const char* output);
+    void BFaultSimVectors();
+    void BFaultSim();
+    void BFaultSimEvaluate(GATE* gptr);
+    bool CheckBFaultyGate(BFAULT* fptr);
 };
 #endif

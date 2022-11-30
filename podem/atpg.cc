@@ -84,45 +84,6 @@ void CIRCUIT::GenerateCheckPointFaultList()
     return;
 }
 
-void CIRCUIT::GenerateAllBFaultList(const char* output) {
-    ofstream f(output);
-    
-    if(f.fail()) {
-        cout << "Failed to open file or Missing output parameter" << endl;
-        exit(-1);
-    }
-
-    cout << "Generate bridging fault list" << endl;
-    register unsigned i;
-
-    GATE* gptr;
-    BFAULT *fptr;
-
-    for (auto gptr : Netlist)
-        Queue[gptr->GetLevel()].push_back(gptr);
-    
-    for (i = 0; i < MaxLevel; ++i) {
-        while (Queue[i].size() > 1) {
-            gptr = Queue[i].front();
-            Queue[i].pop_front();
-            
-            if (gptr->GetFunction() == G_PO)
-                continue;
-
-            fptr = new BFAULT(gptr, Queue[i].front(), AND, S0);
-            BFlist.push_front(fptr);
-            f << gptr->GetName() << "," << Queue[i].front()->GetName() << ",AND" << endl;
-            fptr = new BFAULT(gptr, Queue[i].front(), OR, S1);
-            BFlist.push_front(fptr);
-            f << gptr->GetName() << "," << Queue[i].front()->GetName() << ",OR" << endl;
-        }
-    }
-
-    UBFlist = BFlist;
-    f.close();
-    return;
-}
-
 //stuck-at fualt PODEM ATPG (fault dropping)
 void CIRCUIT::Atpg()
 {
